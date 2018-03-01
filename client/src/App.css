@@ -1,0 +1,97 @@
+body {
+    margin: 0; padding: 0;
+}
+
+.App {
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%; height: 100vh;
+    background-color: #ccc;
+}
+
+.CenterModal {
+    width: 400px; height: 600px;
+    background-color: white;
+    border: solid 1px #ccc;
+    border-radius: 3px;
+    box-shadow: rgba(0,0,0,0.25) 0 1px 5px;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+@media(max-width: 400px) {
+    .CenterModal {
+        width: 100%; height: 100%; border: none;
+    }
+}
+@media(max-height: 600px) {
+    .CenterModal {
+        width: 100%; height: 100%; border: none;
+    }
+}
+
+
+.DictIndicator {
+    font-size: 12px;
+    margin-bottom: 1em;
+    min-height: 3em;
+}
+
+.WordStyler {
+    display: inline-block;
+    width: 0.75em;
+    font-size: 24px;
+    font-family: "Inconsolata", sans-serif;
+    border: none;
+    border-bottom: solid 3px #ccc;
+    text-align: center;
+    padding: 3px;
+}
+
+.CurrentSegment.error {
+    background-color: pink;
+}
+
+.NewLetter {
+    background: #eee;
+    outline: none;
+    width: 1em;
+}
+.NewLetter:focus {
+    border-bottom: solid 3px #6eb1ff;
+}
+
+.Button {
+    margin-top: 2em;
+    font-size: 14px;
+    border: none;
+    border-radius: 5px;
+    background-color: #aaa;
+    color: white;
+    padding: 8px;
+    width: 150px;
+    outline: none;
+    cursor: pointer;
+}
+.Commit.ready {
+    background-color: dodgerblue;
+}
+.Reset {
+    background-color: #c771ff;
+}
+#HardReset {
+    margin: 0;
+    font-size: 14px;
+    background-color: #ccb8c7;
+    position: absolute;
+    right: 10px;
+    top: 10px;
+}
+#HardReset:hover {
+    background-color: #cc66b3;
+}
