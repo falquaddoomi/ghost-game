@@ -36,10 +36,21 @@ body {
 }
 
 
+/*
+---------------------------------------------------
+--- game state
+---------------------------------------------------
+ */
+
 .DictIndicator {
     font-size: 12px;
     margin-bottom: 1em;
-    min-height: 3em;
+    min-height: 8em;
+}
+
+.WordHolder {
+    display: flex;
+    justify-content: center;
 }
 
 .WordStyler {
@@ -66,8 +77,22 @@ body {
     border-bottom: solid 3px #6eb1ff;
 }
 
+
+/*
+---------------------------------------------------
+--- controls
+---------------------------------------------------
+ */
+
+.ButtonTray {
+    margin-top: 1.5em;
+    display: flex; flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
 .Button {
-    margin-top: 2em;
+    margin-top: 0.5em;
     font-size: 14px;
     border: none;
     border-radius: 5px;
@@ -84,6 +109,10 @@ body {
 .Reset {
     background-color: #c771ff;
 }
+.Challenge {
+    background-color: #ffaf78;
+}
+
 #HardReset {
     margin: 0;
     font-size: 14px;
@@ -94,4 +123,36 @@ body {
 }
 #HardReset:hover {
     background-color: #cc66b3;
+}
+
+
+/*
+---------------------------------------------------
+--- player display
+---------------------------------------------------
+ */
+
+.PlayerTray {
+    font-size: small; color: #aaa; margin-bottom: 1em;
+    width: 100%;
+    display: flex;
+}
+
+.PlayerTray .PlayerTile {
+    margin: 20px; padding: 10px; height: 40px;
+    flex: 1 1 40px;
+    vertical-align: middle;
+    border-radius: 5px;
+    background: #ddd;
+}
+.PlayerTile.current {
+    font-weight: bold;
+    color: black;
+    background-color: pink;
+}
+.PlayerTile.you {
+    background: #dad0db;
+}
+.PlayerTile.current.you {
+    background-color: #a1deff;
 }

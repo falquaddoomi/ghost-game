@@ -1,0 +1,22 @@
+{
+  "name": "ghost-game",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test --env=jsdom",
+    "eject": "react-scripts eject"
+  },
+  "proxy": "http://localhost:5000/",
+  "dependencies": {
+    "halogenium": "^2.2.3",
+    "react": "^16.2.0",
+    "react-dom": "^16.2.0",
+    "react-flip-move": "^3.0.1",
+    "react-scripts": "1.1.1",
+    "short-id": "^0.1.0-1",
+    "socket.io-client": "^2.0.4",
+    "word-list-json": "^0.2.0"
+  }
+}
