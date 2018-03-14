@@ -11,6 +11,30 @@ body {
     background-color: #ccc;
 }
 
+.fade-enter {
+    opacity: 0;
+    z-index: 1;
+}
+.fade-enter.fade-enter-active {
+    opacity: 1;
+    transition: opacity 250ms ease-in;
+}
+
+.Screen {
+    /* allows screens to replace each other with animation */
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+
+    /* align things inside to our center */
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
 .CenterModal {
     width: 400px; height: 600px;
     background-color: white;
@@ -34,6 +58,32 @@ body {
         width: 100%; height: 100%; border: none;
     }
 }
+
+
+/*
+---------------------------------------------------
+--- profile creation
+---------------------------------------------------
+*/
+
+.NameStyler {
+    display: inline-block;
+    font-size: 16px;
+    font-family: "Inconsolata", sans-serif;
+    border: none;
+    border-bottom: solid 3px #ccc;
+    text-align: center;
+    padding: 5px 8px 5px 8px;
+    background: #f6f6f6;
+
+    outline: none;
+
+    margin-bottom: 1em;
+}
+.NameStyler:focus {
+    border-bottom: solid 3px #6eb1ff;
+}
+
 
 
 /*
@@ -102,6 +152,8 @@ body {
     width: 150px;
     outline: none;
     cursor: pointer;
+
+    transition: background-color 0.2s linear;
 }
 .Commit.ready {
     background-color: dodgerblue;
@@ -111,6 +163,9 @@ body {
 }
 .Challenge {
     background-color: #ffaf78;
+}
+.ProfileSelected {
+    background-color: dodgerblue;
 }
 
 #HardReset {
@@ -136,23 +191,79 @@ body {
     font-size: small; color: #aaa; margin-bottom: 1em;
     width: 100%;
     display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
 }
 
-.PlayerTray .PlayerTile {
-    margin: 20px; padding: 10px; height: 40px;
+.PlayerTile {
+    position: relative;
+    margin: 20px 10px; padding: 15px 25px;
+    height: 65px; max-width: 50px;
     flex: 1 1 40px;
     vertical-align: middle;
-    border-radius: 5px;
+    border-radius: 25px;
     background: #ddd;
+
+    color: black;
 }
+.PlayerTile .PlayerScore {
+    font-size: 18px;
+    font-weight: bold;
+}
+.PlayerTile .SelfLabel {
+    font-size: 10px;
+    margin-top: 0.2em;
+    color: #555;
+}
+
+/* indicators for who you are + whose turn it is */
+/*
 .PlayerTile.current {
     font-weight: bold;
     color: black;
     background-color: pink;
 }
-.PlayerTile.you {
-    background: #dad0db;
-}
 .PlayerTile.current.you {
     background-color: #a1deff;
+}
+*/
+.PlayerTile.you {
+    background: #d9f2ff;
+}
+
+.arrow-down {
+    visibility: hidden;
+    opacity: 0;
+
+    width: 0;
+    height: 0;
+    border-left: 15px solid transparent;
+    border-right: 15px solid transparent;
+    border-radius: 5px;
+    border-top: 15px solid #777;
+
+    position: absolute;
+    top: -15px; left: 34%;
+
+    transition: opacity 0.2s linear, top 0.3s ease-in;
+}
+.PlayerTile.current .arrow-down {
+    visibility: visible;
+    opacity: 1;
+
+    top: -8px;
+
+    transition: opacity 0.2s linear, top 0.3s ease-in;
+    animation: bouncy 0.5s ease-in-out infinite alternate;
+}
+
+/*
+.PlayerTile.current.you .arrow-down {
+    animation: bouncy 0.5s ease-in-out infinite alternate;
+}
+*/
+
+@keyframes bouncy {
+    from { transform: translate(0, -5px) }
+    to { transform: translate(0, 5px) }
 }

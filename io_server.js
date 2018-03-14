@@ -12,7 +12,7 @@ class GhostGame {
         this.server = io();
         this.createGame();
 
-        this.wordy_clients = [];
+        this.clients = [];
         this.currentWord = [];
         this.inDict = true;
         this.stillWinnable = true;
@@ -23,8 +23,8 @@ class GhostGame {
 
     createGame() {
         this.server.on('connection', (client) => {
-            // client.on('subscribeToGame', () => this.playerSubscribed(client));
-            this.playerSubscribed(client);
+            client.on('subscribeToGame', (name, avatar) => this.playerSubscribed(client, name, avatar));
+            // this.playerSubscribed(client, name, avatar);
         });
     }
 
@@ -36,25 +36,28 @@ class GhostGame {
     // player lifecycle events
     //
 
-    playerSubscribed(client) {
+    playerSubscribed(client, name, avatar) {
         // ---------------------------------------------------------------------------------
         // --- perform player init on subscription
         // ---------------------------------------------------------------------------------
 
         // const current_id = shortid.generate();
         const current_id = client.id;
-        this.wordy_clients.push({ id: current_id, client });
+        this.clients.push({
+            id: current_id, name, avatar, client,
+            score: 0
+        });
 
-        console.log(`client subscribed to the game w/ID ${current_id}`);
+        console.log(`client ${name} subscribed to the game w/ID ${current_id}`);
         console.log("sending current word: ", this.currentWord);
 
         // tell this player what the current word is
         client.emit('yourID', current_id);
-        client.emit('currentPlayerChanged', this.wordy_clients[this.curPlayerIdx].id);
+        client.emit('currentPlayerChanged', this.clients[this.curPlayerIdx].id);
         this.sendUpdatedWord(client);
 
         // tell everyone there's a new player
-        this.server.emit('playersUpdated', this.wordy_clients.map(player => player.id));
+        this.updatePlayerStatuses();
 
 
         // ---------------------------------------------------------------------------------
@@ -78,23 +81,38 @@ class GhostGame {
         client.on('disconnect', () => this.playerDisconnected(client));
     }
 
+    updatePlayerStatuses() {
+        this.server.emit('updatePlayerStatuses', this.clients.map(player => ({
+            id: player.id,
+            name: player.name,
+            avatar: player.avatar,
+            score: player.score
+        })));
+
+        // ensure that there's a valid player
+        this.curPlayerIdx = this.curPlayerIdx % this.clients.length;
+        if (this.clients[this.curPlayerIdx]) {
+            this.server.emit('currentPlayerChanged', this.clients[this.curPlayerIdx].id);
+        }
+    }
+
     playerDisconnected(client) {
-        const disconnected_player_idx = this.wordy_clients.findIndex((cur) => cur.client.id === client.id);
-        const discPlayerID = this.wordy_clients[disconnected_player_idx].id;
+        const disconnected_player_idx = this.clients.findIndex((cur) => cur.client.id === client.id);
+        const discPlayerID = this.clients[disconnected_player_idx].id;
 
         if (disconnected_player_idx >= 0) {
             console.log(`player ${discPlayerID} (${disconnected_player_idx + 1}) disconnected!`);
-            this.wordy_clients.splice(disconnected_player_idx, 1);
-            this.server.emit('playersUpdated', this.wordy_clients.map(player => player.id));
+            this.clients.splice(disconnected_player_idx, 1);
+            this.updatePlayerStatuses();
 
             // if there's anyone left...
-            if (this.wordy_clients.length > 0) {
+            if (this.clients.length > 0) {
                 // check if we need to update the current player (e.g. if the old one parted)
-                const newCurPlayerIdx = (this.curPlayerIdx % this.wordy_clients.length);
+                const newCurPlayerIdx = (this.curPlayerIdx % this.clients.length);
 
                 if (newCurPlayerIdx !== this.curPlayerIdx) {
                     this.curPlayerIdx = newCurPlayerIdx;
-                    this.server.emit('currentPlayerChanged', this.wordy_clients[this.curPlayerIdx].id);
+                    this.server.emit('currentPlayerChanged', this.clients[this.curPlayerIdx].id);
                 }
             }
             else {
@@ -113,7 +131,7 @@ class GhostGame {
     //
 
     isPlayersTurn(client) {
-        const thisPlayerIdx = this.wordy_clients.findIndex((cur) => cur.client.id === client.id);
+        const thisPlayerIdx = this.clients.findIndex((cur) => cur.client.id === client.id);
         return thisPlayerIdx === this.curPlayerIdx;
     }
 
@@ -149,8 +167,9 @@ class GhostGame {
         // then penalizes the offender and restarts the game if the challenge goes through
         // or penalizes the challenger and continues if the challenge fails
 
-        if (this.currentWord.length <= 0 || !this.lastPlayedClient || this.lastPlayedClient === client) {
-            // there has to be a word played, a last-played client, and you can't challenge yourself
+        if (this.currentWord.length <= 0 || !this.lastPlayedClient || (this.lastPlayedClient === client && this.clients.length > 1)) {
+            // there has to be a word played, a last-played client,
+            // and you can't challenge yourself (unless you're playing by yourself)
             console.log("* challenge attempted, but didn't meet the requirements");
             return;
         }
@@ -167,8 +186,19 @@ class GhostGame {
             if (violated) {
                 // clear the word and update everyone
                 this.currentWord = [];
+
+                // penalize the challenged player and let everyone know
+                this.lastPlayedClient.score -= 1;
+                this.updatePlayerStatuses();
+
                 this.sendUpdatedWord();
                 this.advanceTurn();
+            }
+            else {
+                // penalize the challenger and let everyone know
+                const challenger = this.clients.find((player) => player.client === client);
+                challenger.score -= 1;
+                this.updatePlayerStatuses();
             }
         }, 1000);
     }
@@ -179,6 +209,14 @@ class GhostGame {
             // TODO: maybe scold the player if it's not their turn?
             return;
         }
+
+        // give everyone points except the last player, if there was one
+        this.clients.forEach((player) => {
+            if (player.client !== this.lastPlayedClient) {
+                player.score += 1;
+            }
+        });
+        this.updatePlayerStatuses();
 
         // clear the word and update everyone
         this.currentWord = [];
@@ -208,8 +246,8 @@ class GhostGame {
 
     advanceTurn() {
         // advance the current player and let everyone know who the current player is
-        this.curPlayerIdx = ((this.curPlayerIdx + 1) % this.wordy_clients.length);
-        this.server.emit('currentPlayerChanged', this.wordy_clients[this.curPlayerIdx].id);
+        this.curPlayerIdx = ((this.curPlayerIdx + 1) % this.clients.length);
+        this.server.emit('currentPlayerChanged', this.clients[this.curPlayerIdx].id);
     }
 
     sendUpdatedWord(toClient) {

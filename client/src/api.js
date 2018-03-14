@@ -2,8 +2,8 @@ import io from 'socket.io-client';
 
 const socket = io('http://localhost:5005');
 
-export function subscribeToGame(playersUpdated, wordUpdated, myIDReceived, currentPlayerChanged, challengeInProgress, challengeResolved) {
-    socket.on('playersUpdated', (players) => playersUpdated(players));
+export function subscribeToGame(name, avatar, playersUpdated, wordUpdated, myIDReceived, currentPlayerChanged, challengeInProgress, challengeResolved) {
+    socket.on('updatePlayerStatuses', (players) => playersUpdated(players));
     socket.on('wordUpdated', (status) => wordUpdated(status));
     socket.on('yourID', (clientID) => myIDReceived(clientID));
     socket.on('currentPlayerChanged', (playerID) => currentPlayerChanged(playerID));
@@ -12,7 +12,7 @@ export function subscribeToGame(playersUpdated, wordUpdated, myIDReceived, curre
     socket.on('challengeResolved', challengeResolved);
 
 
-    socket.emit('subscribeToGame');
+    socket.emit('subscribeToGame', name, avatar);
 }
 
 export function updateWord(nextWord, isRightUpdate) {

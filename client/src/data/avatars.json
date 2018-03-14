@@ -1,0 +1,202 @@
+{
+  "aquarium": {
+    "name": "aquarium",
+    "filename": "data/avatars/png/aquarium.png"
+  },
+  "brush-1": {
+    "name": "brush-1",
+    "filename": "data/avatars/png/brush-1.png"
+  },
+  "filter": {
+    "name": "filter",
+    "filename": "data/avatars/png/filter.png"
+  },
+  "hamster-1": {
+    "name": "hamster-1",
+    "filename": "data/avatars/png/hamster-1.png"
+  },
+  "rabbit": {
+    "name": "rabbit",
+    "filename": "data/avatars/png/rabbit.png"
+  },
+  "spider": {
+    "name": "spider",
+    "filename": "data/avatars/png/spider.png"
+  },
+  "water-1": {
+    "name": "water-1",
+    "filename": "data/avatars/png/water-1.png"
+  },
+  "bacon": {
+    "name": "bacon",
+    "filename": "data/avatars/png/bacon.png"
+  },
+  "brush": {
+    "name": "brush",
+    "filename": "data/avatars/png/brush.png"
+  },
+  "fish-1": {
+    "name": "fish-1",
+    "filename": "data/avatars/png/fish-1.png"
+  },
+  "hamster": {
+    "name": "hamster",
+    "filename": "data/avatars/png/hamster.png"
+  },
+  "scissors": {
+    "name": "scissors",
+    "filename": "data/avatars/png/scissors.png"
+  },
+  "spray": {
+    "name": "spray",
+    "filename": "data/avatars/png/spray.png"
+  },
+  "water": {
+    "name": "water",
+    "filename": "data/avatars/png/water.png"
+  },
+  "ball": {
+    "name": "ball",
+    "filename": "data/avatars/png/ball.png"
+  },
+  "canned-food": {
+    "name": "canned-food",
+    "filename": "data/avatars/png/canned-food.png"
+  },
+  "fish-2": {
+    "name": "fish-2",
+    "filename": "data/avatars/png/fish-2.png"
+  },
+  "kennel-1": {
+    "name": "kennel-1",
+    "filename": "data/avatars/png/kennel-1.png"
+  },
+  "scratching": {
+    "name": "scratching",
+    "filename": "data/avatars/png/scratching.png"
+  },
+  "syringe": {
+    "name": "syringe",
+    "filename": "data/avatars/png/syringe.png"
+  },
+  "bird-1": {
+    "name": "bird-1",
+    "filename": "data/avatars/png/bird-1.png"
+  },
+  "cat": {
+    "name": "cat",
+    "filename": "data/avatars/png/cat.png"
+  },
+  "fish-bowl": {
+    "name": "fish-bowl",
+    "filename": "data/avatars/png/fish-bowl.png"
+  },
+  "kennel": {
+    "name": "kennel",
+    "filename": "data/avatars/png/kennel.png"
+  },
+  "seaweed": {
+    "name": "seaweed",
+    "filename": "data/avatars/png/seaweed.png"
+  },
+  "test": {
+    "name": "test",
+    "filename": "data/avatars/png/test.png"
+  },
+  "bird-2": {
+    "name": "bird-2",
+    "filename": "data/avatars/png/bird-2.png"
+  },
+  "collar": {
+    "name": "collar",
+    "filename": "data/avatars/png/collar.png"
+  },
+  "fish": {
+    "name": "fish",
+    "filename": "data/avatars/png/fish.png"
+  },
+  "lamp": {
+    "name": "lamp",
+    "filename": "data/avatars/png/lamp.png"
+  },
+  "shampoo-1": {
+    "name": "shampoo-1",
+    "filename": "data/avatars/png/shampoo-1.png"
+  },
+  "thermometer": {
+    "name": "thermometer",
+    "filename": "data/avatars/png/thermometer.png"
+  },
+  "bird": {
+    "name": "bird",
+    "filename": "data/avatars/png/bird.png"
+  },
+  "comb": {
+    "name": "comb",
+    "filename": "data/avatars/png/comb.png"
+  },
+  "fly-swatter": {
+    "name": "fly-swatter",
+    "filename": "data/avatars/png/fly-swatter.png"
+  },
+  "leash": {
+    "name": "leash",
+    "filename": "data/avatars/png/leash.png"
+  },
+  "shampoo": {
+    "name": "shampoo",
+    "filename": "data/avatars/png/shampoo.png"
+  },
+  "toy": {
+    "name": "toy",
+    "filename": "data/avatars/png/toy.png"
+  },
+  "birdhouse": {
+    "name": "birdhouse",
+    "filename": "data/avatars/png/birdhouse.png"
+  },
+  "dog-food": {
+    "name": "dog-food",
+    "filename": "data/avatars/png/dog-food.png"
+  },
+  "food": {
+    "name": "food",
+    "filename": "data/avatars/png/food.png"
+  },
+  "pet-bed": {
+    "name": "pet-bed",
+    "filename": "data/avatars/png/pet-bed.png"
+  },
+  "snake": {
+    "name": "snake",
+    "filename": "data/avatars/png/snake.png"
+  },
+  "treat": {
+    "name": "treat",
+    "filename": "data/avatars/png/treat.png"
+  },
+  "bone": {
+    "name": "bone",
+    "filename": "data/avatars/png/bone.png"
+  },
+  "dog": {
+    "name": "dog",
+    "filename": "data/avatars/png/dog.png"
+  },
+  "glove": {
+    "name": "glove",
+    "filename": "data/avatars/png/glove.png"
+  },
+  "pliers": {
+    "name": "pliers",
+    "filename": "data/avatars/png/pliers.png"
+  },
+  "soil": {
+    "name": "soil",
+    "filename": "data/avatars/png/soil.png"
+  },
+  "turtle": {
+    "name": "turtle",
+    "filename": "data/avatars/png/turtle.png"
+  }
+}
