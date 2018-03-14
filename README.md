@@ -14,3 +14,7 @@ run the server and/or client separately via `npm run-script server` or `npm run-
 # Project Structure
 
 The server is mostly implemented in `io_server.js` (`express_server.js` is currently a stub that will be filled out later). The client is in the `client/` subdirectory, but is otherwise laid out like a standard [create-react-app](https://github.com/facebook/create-react-app) application.
+
+# Credits
+
+Avatar icons are designed by Freepik from Flaticon (the ["Pet Shop"](https://www.flaticon.com/packs/pet-shop-2) lineal icon set, specifically).
