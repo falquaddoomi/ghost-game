@@ -12,15 +12,25 @@ import './App.css';
 import Profile from "./components/Profile";
 import Game from './components/Game';
 
+import avatars from './data/avatars.json';
+
 class App extends React.Component {
     constructor(props) {
         super(props);
 
         this.state = {
-            name: 'random-user-' + Math.random()*100,
-            avatar: ''
+            selectedAvatar: null,
+            playerName: ''
         };
     }
+
+    onNameUpdated = (newName) => {
+        this.setState({ playerName: newName });
+    };
+
+    onAvatarUpdated = (avatar) => {
+        this.setState({ selectedAvatar: avatar });
+    };
 
     render() {
         return (
@@ -39,10 +49,25 @@ class App extends React.Component {
 
                                 <div>
                                     <TransitionGroup>
-                                        <CSSTransition key={location.key} classNames="fade" timeout={300}>
+                                        <CSSTransition key={location.key} classNames="pagefade" timeout={300}>
                                             <Switch location={location}>
-                                                <Route exact path="/profile" component={Profile} />
-                                                <Route exact path="/game" component={Game} />
+                                                <Route exact path="/profile" render={
+                                                    (props) => <Profile
+                                                        nameUpdated={this.onNameUpdated}
+                                                        avatarUpdated={this.onAvatarUpdated}
+                                                        name={this.state.playerName}
+                                                        avatar={this.state.selectedAvatar}
+                                                        {...props}
+                                                    />}
+                                                />
+
+                                                <Route exact path="/game" render={
+                                                    (props) => <Game
+                                                        name={this.state.playerName}
+                                                        avatar={this.state.selectedAvatar}
+                                                        {...props}
+                                                    />
+                                                } />
 
                                                 {/*
                                                 without this `Route`, we would get errors

@@ -9,60 +9,58 @@ class Profile extends React.Component {
         super(props);
 
         this.state = {
-            selectedAvatar: null,
-            playerName: '',
             manualName: false
         }
     }
 
     selectAvatar = (avatar) => {
-        this.setState(({ playerName, manualName }) => ({
-            selectedAvatar: avatar,
-            playerName: !manualName ? avatar.name : playerName
-        }));
+        if (!this.state.manualName) {
+            this.props.nameUpdated(avatar.name);
+        }
+        this.props.avatarUpdated(avatar);
     };
 
     changePlayerName = (event) => {
+        const newName = event.target.value;
+
         this.setState({
-            playerName: event.target.value,
-            manualName: !!event.target.value
+            manualName: !!newName
+        }, () => {
+            this.props.nameUpdated(newName);
         })
     };
 
     readyToGo = () => {
-        return !!(this.state.selectedAvatar && this.state.playerName);
+        return !!(this.props.avatar && this.props.name);
     };
 
     proceed = () => {
         if (this.readyToGo()) {
-            this.props.history.push('/game', {
-                playerName: this.state.playerName,
-                avatarName: this.state.selectedAvatar.name
-            });
+            this.props.history.push('/game');
         }
     };
 
     render() {
-        const {selectedAvatar, playerName} = this.state;
+        const {avatar, name} = this.props;
 
         return (
             <div className="Screen">
                 <div className="CenterModal">
 
                     <div style={styles.chosenPortrait}>
-                    { selectedAvatar &&
-                        <img width={50} height={50} src={require(`../${selectedAvatar.filename}`)} alt={selectedAvatar.name} />
+                    { avatar &&
+                        <img width={50} height={50} src={require(`../${avatar.filename}`)} alt={avatar.name} />
                     }
                     </div>
 
-                    <input type="text" value={playerName} onChange={this.changePlayerName} className="NameStyler" />
+                    <input type="text" value={name} onChange={this.changePlayerName} className="NameStyler" />
 
                     <div style={styles.avatarlist}>
                     {
                         Object.values(avatars).map(x => <a key={x.name} name={x.name} style={
                             {
                                 ...styles.portraitFrame,
-                                ...(selectedAvatar && selectedAvatar.name === x.name ? styles.selected : null)
+                                ...(avatar && avatar.name === x.name ? styles.selected : null)
                             }
                         } onClick={() => this.selectAvatar(x)}>
                             <div style={styles.portrait}>

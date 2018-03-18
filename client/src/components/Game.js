@@ -1,12 +1,18 @@
 /* globals require */
 import React from 'react';
+import io from 'socket.io-client';
+import { TransitionGroup, CSSTransition } from "react-transition-group";
 import FlipMove from 'react-flip-move';
 
-import {subscribeToGame, updateWord, requestReset, challengeRequested} from '../api';
 import {PulseLoader} from "halogenium";
 import {withRouter} from "react-router-dom";
 
 import avatars from '../data/avatars.json';
+
+import shortid from 'short-id';
+
+// deal with connecting here
+const socket = io('http://localhost:5005');
 
 class Game extends React.Component {
     constructor(props) {
@@ -20,39 +26,85 @@ class Game extends React.Component {
             left: '',
             right: '',
             inDict: false,
-            stillWinnable: true
+            stillWinnable: true,
+            deltas: []
         };
     }
 
     componentDidMount() {
-        if (!this.props.location || !this.props.location.state) {
+        // check if we've received a name, otherwise we can't subscribe yet
+        const {name, avatar} = this.props;
+
+        if (!name || !avatar) {
             this.props.history.replace('/profile');
             return;
         }
 
-        // check if we've received a name, otherwise we can't subscribe yet
-        const {playerName, avatarName} = this.props.location.state;
+        console.log(`name: ${name}, avatar: ${avatar.name}`);
 
-        console.log(`name: ${playerName}, avatar: ${avatarName}`);
-
-        if (playerName && avatarName) {
-            subscribeToGame(
-                playerName, avatarName,
-                this.playersUpdated, this.wordUpdated, this.myIDReceived, this.currentPlayerChanged,
-                this.challengeInProgress, this.challengeResolved
-            );
+        if (name && avatar) {
+            this.subscribeToGame(name, avatar.name);
         }
         else {
             this.props.history.replace('/profile');
         }
     }
 
+    subscribeToGame = (name, avatar) => {
+        socket.on('updatePlayerStatuses', this.playersUpdated);
+        socket.on('wordUpdated', this.wordUpdated);
+        socket.on('yourID', this.myIDReceived);
+        socket.on('currentPlayerChanged', this.currentPlayerChanged);
+
+        // challenges
+        socket.on('challengeInProgress', this.challengeInProgress);
+        socket.on('challengeResolved', this.challengeResolved);
+
+        // server meta
+        socket.on('disconnect', (reason) => {
+            console.log("server kicked us!: ", reason);
+            this.props.history.replace('/profile');
+        });
+
+        // adds us to the game
+        socket.emit('subscribeToGame', name, avatar);
+    };
+
     playersUpdated = (players) => {
-        this.setState({ players })
+        this.setState((pstate) => {
+            // any players who have different scores need to show an animated change
+            const newDeltas = Object.entries(pstate.players)
+                .filter(([k,v]) => players[k])
+                .map(([k,v]) => ({
+                    id: v.id,
+                    deltaID: shortid.generate(),
+                    delta: players[k].score - v.score,
+                    deathtime: Date.now() + 1000
+                }))
+                .filter(x => x.delta !== 0);
+
+            return {
+                players,
+                deltas: pstate.deltas.concat(newDeltas)
+            };
+        }, () => {
+            console.log(`score deltas: ${JSON.stringify(this.state.deltas)}`);
+
+            // eventually clean up any dead deltas
+            setTimeout(() => {
+                this.setState((pstate) => ({
+                    deltas: pstate.deltas.filter(x => x.deathtime > Date.now())
+                }));
+            }, 1100);
+        });
     };
 
     wordUpdated = (currentWord) => {
         this.receiveChange(currentWord);
+    };
+
+    currentWordText = () => {
+        return this.state.current.map(({letter}) => letter).join("");
     };
 
     challengeInProgress = (accuser, accused) => {
@@ -102,12 +154,16 @@ class Game extends React.Component {
         }
 
         const isRightUpdate = right.length > 0;
-        updateWord(isRightUpdate ? right : left, isRightUpdate);
+        socket.emit('updateWord', isRightUpdate ? right : left, isRightUpdate);
+    };
+
+    isChallengeAllowed = () => {
+        return this.isMyTurn() && this.state.current.length > 3;
     };
 
     requestChallenge = () => {
         // TODO: send challenge request to server
-        challengeRequested();
+        socket.emit('challengeRequested');
     };
 
     receiveChange = (status) => {
@@ -128,7 +184,7 @@ class Game extends React.Component {
 
     resetGame = () => {
         // FIXME: check if we're connected; use local state if we're not
-        requestReset();
+        socket.emit('requestReset');
     };
 
     isMyTurn = () => {
@@ -136,7 +192,7 @@ class Game extends React.Component {
     };
 
     render() {
-        const {left, right, current, inDict, stillWinnable} = this.state;
+        const {left, right, current, inDict} = this.state;
 
         const myTurnBlurb = (
             current.length > 0
@@ -146,18 +202,34 @@ class Game extends React.Component {
                             <i>
                                 <div>good so far...</div>
                                 { this.isMyTurn() && <h3>(it's your turn, by the way)</h3> }
-                                { stillWinnable || <div>(it's no longer winnable, though...)</div>}
                             </i>
                         )
-                        : <a target="_blank" href={`http://www.dictionary.com/browse/${current}`}>oops!</a>
+                        : <i>
+                            <div>oops!</div>
+                            <a target="_blank" href={`http://www.dictionary.com/browse/${this.currentWordText()}`}>look up word</a>
+                        </i>
                 )
                 : (this.isMyTurn() ? <i>enter a letter to begin</i> : <i>waiting for other players...</i>)
         );
 
+        // me
+        const avatarEntry = this.props.avatar ? avatars[this.props.avatar.name] : null;
+        const avatarImage = avatarEntry
+            ? <img width={30} height={30} src={require(`../${avatarEntry.filename}`)} alt={avatarEntry.name} />
+            : null;
+
         return (
             <div className="Screen">
                 <div className="CenterModal">
-                    <div style={{flex: '0.2 0'}} />
+                    {/*
+                    <div style={{flex: '0.2 0 auto', justifyContent: 'flex-start'}}>
+                        <div style={{display: 'flex', alignItems: 'center', padding: '5px', background: '#eee', width: '100%'}}>
+                            {this.props.name} {avatarImage}
+                            <a href="/profile">change name/avatar</a>
+                        </div>
+                    </div>
+                    */}
+
                     <div className="Controls" style={{flex: '0.8 0'}}>
                         <div className="DictIndicator">
                         { myTurnBlurb }
@@ -169,7 +241,7 @@ class Game extends React.Component {
                                 <input type="text" name="left_insert" disabled={!this.isMyTurn()} onChange={this.edited} onKeyPress={this.checkEnter} value={left} className="NewLetter WordStyler" maxLength={1} />
                             }
 
-                            { current.map(({ key, letter }) => <span key={key} className="WordStyler">{letter}</span>) }
+                            { current.map(({ key, letter }) => <span key={key} className="WordStyler CommittedLetter">{letter}</span>) }
 
                             {
                                 !inDict && left === '' &&
@@ -184,7 +256,7 @@ class Game extends React.Component {
                         }
 
                         { !inDict &&
-                            <button className={`Button ${ current.length > 0 && "Challenge" }`} onClick={this.requestChallenge}>
+                            <button className={`Button ${ this.isChallengeAllowed() && "Challenge" }`} onClick={this.requestChallenge}>
                             { !this.state.challengeInProgress ? "challenge" : <PulseLoader color="white" size="4px" margin="4px" /> }
                             </button>
                         }
@@ -193,7 +265,7 @@ class Game extends React.Component {
 
                     <FlipMove className="PlayerTray" duration={400} easing="ease-in-out">
                     {
-                        this.state.players.map((player, idx) => {
+                        this.state.players.map((player) => {
                             const isPlayersTurn = player.id === this.state.currentPlayerID;
 
                             const avatarEntry = player.avatar ? avatars[player.avatar] : null;
@@ -210,13 +282,24 @@ class Game extends React.Component {
                                     </div>
 
                                     <div className="PlayerID">{player.name}</div>
-                                    <div className="PlayerScore">{player.score}</div>
-
-                                    {/*
-                                        player.id === this.state.myID && <div className="SelfLabel">(you)</div>
-                                    */}
+                                    <div className="PlayerScore">{
+                                        player.score > 0 ? "ghost".slice(0, player.score) : '-'
+                                    }</div>
 
                                     <div className="arrow-down"/>
+
+                                    <div className="deltas">
+                                    {
+                                        // render per-player animated deltas
+                                        this.state.deltas
+                                            .filter(x => x.id === player.id)
+                                            .map((x) =>
+                                                <div className={`score-delta ${x.delta > 0 ? 'score-up' : 'score-down'}`}>
+                                                {x.delta > 0 ? '💥' : ''}
+                                                </div>
+                                            )
+                                    }
+                                    </div>
                                 </div>
                             );
                         })

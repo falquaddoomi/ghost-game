@@ -9,7 +9,7 @@ const MIN_OK_LENGTH = 3;
 
 class GhostGame {
     constructor(port) {
-        this.server = io();
+        this.server = io(port);
         this.createGame();
 
         this.clients = [];
@@ -19,6 +19,8 @@ class GhostGame {
         this.curPlayerIdx = 0;
 
         this.lastPlayedClient = null;
+
+        console.log('listening on port', port);
     }
 
     createGame() {
@@ -26,10 +28,6 @@ class GhostGame {
             client.on('subscribeToGame', (name, avatar) => this.playerSubscribed(client, name, avatar));
             // this.playerSubscribed(client, name, avatar);
         });
-    }
-
-    start() {
-        this.server.listen(port);
     }
 
     //
@@ -48,7 +46,7 @@ class GhostGame {
             score: 0
         });
 
-        console.log(`client ${name} subscribed to the game w/ID ${current_id}`);
+        console.log(`client ${name} (w/avatar ${avatar}) subscribed to the game w/ID ${current_id}`);
         console.log("sending current word: ", this.currentWord);
 
         // tell this player what the current word is
@@ -58,7 +56,6 @@ class GhostGame {
 
         // tell everyone there's a new player
         this.updatePlayerStatuses();
-
 
         // ---------------------------------------------------------------------------------
         // --- define player-sent events
@@ -130,6 +127,10 @@ class GhostGame {
     // player action handling
     //
 
+    getPlayerBySocket(client) {
+        return this.clients.find((cur) => cur.client.id === client.id);
+    }
+
     isPlayersTurn(client) {
         const thisPlayerIdx = this.clients.findIndex((cur) => cur.client.id === client.id);
         return thisPlayerIdx === this.curPlayerIdx;
@@ -154,8 +155,15 @@ class GhostGame {
             this.currentWord.unshift({ key: nextKey, letter });
         }
 
-        // remember the last player who took a turn in case there's a challenge
+        // remember the last player who took a turn in case there's a challenge or they lose
         this.lastPlayedClient = client;
+
+        // check word status here
+        const status = this.getWordStatus(this.currentWord);
+        this.inDict = status.inDict;
+        this.stillWinnable = status.stillWinnable;
+
+        // FIXME: if it's in the dictionary, the game's lost; just tell everyone that and let anyone reset
 
         this.sendUpdatedWord();
         this.advanceTurn();
@@ -167,10 +175,16 @@ class GhostGame {
         // then penalizes the offender and restarts the game if the challenge goes through
         // or penalizes the challenger and continues if the challenge fails
 
-        if (this.currentWord.length <= 0 || !this.lastPlayedClient || (this.lastPlayedClient === client && this.clients.length > 1)) {
+        if (!this.isPlayersTurn(client) || this.currentWord.length <= MIN_OK_LENGTH || !this.lastPlayedClient || (this.lastPlayedClient === client && this.clients.length > 1)) {
             // there has to be a word played, a last-played client,
             // and you can't challenge yourself (unless you're playing by yourself)
             console.log("* challenge attempted, but didn't meet the requirements");
+            console.log(
+                `  (reqs: ` +
+                `this.currentWord.length <= MIN_OK_LENGTH: ${this.currentWord.length <= MIN_OK_LENGTH} ` +
+                `|| !this.lastPlayedClient: ${!this.lastPlayedClient} ` +
+                `|| (this.lastPlayedClient === client: ${this.lastPlayedClient === client} && this.clients.length > 1: ${this.clients.length > 1}))`
+            );
             return;
         }
 
@@ -184,22 +198,24 @@ class GhostGame {
             this.server.emit('challengeResolved', this.lastPlayedClient.id, client.id, violated);
 
             if (violated) {
-                // clear the word and update everyone
-                this.currentWord = [];
-
                 // penalize the challenged player and let everyone know
-                this.lastPlayedClient.score -= 1;
+                const challenged = this.clients.find((player) => player.client === this.lastPlayedClient);
+                challenged.score += 1;
                 this.updatePlayerStatuses();
-
-                this.sendUpdatedWord();
-                this.advanceTurn();
             }
             else {
                 // penalize the challenger and let everyone know
                 const challenger = this.clients.find((player) => player.client === client);
-                challenger.score -= 1;
+                challenger.score += 1;
                 this.updatePlayerStatuses();
             }
+
+            // clear the word and update everyone
+            this.currentWord = [];
+            this.sendUpdatedWord();
+
+            // and move on
+            this.advanceTurn();
         }, 1000);
     }
 
@@ -210,9 +226,9 @@ class GhostGame {
             return;
         }
 
-        // give everyone points except the last player, if there was one
+        // penalize the loser
         this.clients.forEach((player) => {
-            if (player.client !== this.lastPlayedClient) {
+            if (player.client === this.lastPlayedClient) {
                 player.score += 1;
             }
         });
@@ -252,10 +268,7 @@ class GhostGame {
 
     sendUpdatedWord(toClient) {
         console.log("new word: ", this.currentWord);
-
         const status = this.getWordStatus(this.currentWord);
-        this.inDict = status.inDict;
-        this.stillWinnable = status.stillWinnable;
 
         if (toClient) {
             toClient.emit('wordUpdated', status);
@@ -285,6 +298,3 @@ class GhostGame {
 }
 
 const game = new GhostGame(port);
-game.start();
-
-console.log('listening on port', port);
