@@ -188,7 +188,8 @@ body {
  */
 
 .PlayerTray {
-    font-size: small; color: #aaa; margin-bottom: 1em;
+    font-size: small; color: #aaa;
+    margin-bottom: 1em;
     width: 100%;
     display: flex;
     flex-wrap: wrap;
@@ -197,37 +198,38 @@ body {
 
 .PlayerTile {
     position: relative;
-    margin: 20px 10px; padding: 15px 25px;
-    height: 65px; max-width: 50px;
-    flex: 1 1 40px;
+    margin: 10px 5px; padding: 15px 20px;
+    height: 65px;
+    width: 50px;
+    flex: 0 1 50px;
     vertical-align: middle;
     border-radius: 25px;
-    background: #ddd;
+    background-color: #ddd;
 
     color: black;
+
+    transition: transform 500ms, background-color 1s;
 }
 .PlayerTile .PlayerID {
     white-space: nowrap;
+    font-size: 14px;
 }
 .PlayerTile .PlayerScore {
     font-size: 22px;
     font-weight: bold;
 }
 
+.PlayerTile .PlayerScore .ScoreLetter {
+    color: #49525c;
+}
 
-/* indicators for who you are + whose turn it is */
-/*
-.PlayerTile.current {
-    font-weight: bold;
-    color: black;
-    background-color: pink;
-}
-.PlayerTile.current.you {
-    background-color: #a1deff;
-}
-*/
 .PlayerTile.you {
-    background: #d9f2ff;
+    background-color: #d9f2ff;
+}
+
+.PlayerTile.dead {
+    transform: scale(0.75, 0.75);
+    background-color: #eee;
 }
 
 /* current player indication + animation */
@@ -258,12 +260,6 @@ body {
     animation: bouncy 0.5s ease-in-out infinite alternate;
 }
 
-/*
-.PlayerTile.current.you .arrow-down {
-    animation: bouncy 0.5s ease-in-out infinite alternate;
-}
-*/
-
 @keyframes bouncy {
     from { transform: translate(0, -5px) }
     to { transform: translate(0, 5px) }
@@ -283,16 +279,10 @@ body {
 }
 
 .PlayerTile .deltas .score-delta.score-up {
-    color: #65c683;
     animation: wowzer 1s ease-in-out;
     opacity: 0;
 }
 
-.PlayerTile .deltas .score-delta.score-down {
-    color: #c46666;
-    animation: owzer 1s ease-in-out;
-    opacity: 0;
-}
 
 @keyframes wowzer {
     0% { opacity: 1; transform: translateY(0px); }
@@ -300,8 +290,46 @@ body {
     100% { opacity: 0; transform: translateY(-30px); }
 }
 
-@keyframes owzer {
-    0% { opacity: 1; transform: translateY(-30px); }
-    50% { opacity: 1; }
-    100% { opacity: 0; transform: translateY(0px); }
+@keyframes zoomer {
+    0% { opacity: 0; transform: scale(1, 1); }
+    90% { opacity: 1; transform: scale(3, 3); }
+    100% { opacity: 0; transform: scale(1, 1); }
 }
+
+
+/*
+---------------------------------------------------
+--- challenge display
+---------------------------------------------------
+ */
+
+.ChallengeDisplay {
+    display: flex;
+    width: 40%;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.ChallengeDisplay .conflicter {
+    font-size: 24px;
+    animation: zoomer 0.5s ease-in-out infinite;
+}
+
+.challenge-contender {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 60px; height: 60px;
+    /*
+    border-radius: 30px;
+    background: #eee;
+    */
+
+    transition: opacity 0.2s linear, transform 0.3s ease-in;
+    animation: bouncy 0.3s ease-in-out infinite alternate;
+}
+
+.challenge-contender.challenger {
+    animation: bouncy 0.3s ease-in-out infinite alternate-reverse;
+}
+
