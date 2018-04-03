@@ -11,6 +11,7 @@
   "proxy": "http://localhost:5000/",
   "dependencies": {
     "halogenium": "^2.2.3",
+    "lodash": "^4.17.5",
     "react": "^16.2.0",
     "react-dom": "^16.2.0",
     "react-flip-move": "^3.0.1",
