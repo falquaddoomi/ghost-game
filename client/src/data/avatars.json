@@ -3,16 +3,16 @@
     "name": "aquarium",
     "filename": "data/avatars/png/aquarium.png"
   },
-  "brush-1": {
-    "name": "brush-1",
+  "wide brush": {
+    "name": "wide brush",
     "filename": "data/avatars/png/brush-1.png"
   },
   "filter": {
     "name": "filter",
     "filename": "data/avatars/png/filter.png"
   },
-  "hamster-1": {
-    "name": "hamster-1",
+  "hamsteroid": {
+    "name": "hamsteroid",
     "filename": "data/avatars/png/hamster-1.png"
   },
   "rabbit": {
@@ -23,8 +23,8 @@
     "name": "spider",
     "filename": "data/avatars/png/spider.png"
   },
-  "water-1": {
-    "name": "water-1",
+  "cooler": {
+    "name": "cooler",
     "filename": "data/avatars/png/water-1.png"
   },
   "bacon": {
@@ -35,8 +35,8 @@
     "name": "brush",
     "filename": "data/avatars/png/brush.png"
   },
-  "fish-1": {
-    "name": "fish-1",
+  "yellow fish": {
+    "name": "yellow fish",
     "filename": "data/avatars/png/fish-1.png"
   },
   "hamster": {
@@ -59,16 +59,16 @@
     "name": "ball",
     "filename": "data/avatars/png/ball.png"
   },
-  "canned-food": {
-    "name": "canned-food",
+  "canned food": {
+    "name": "canned food",
     "filename": "data/avatars/png/canned-food.png"
   },
-  "fish-2": {
-    "name": "fish-2",
+  "fish food": {
+    "name": "fish food",
     "filename": "data/avatars/png/fish-2.png"
   },
-  "kennel-1": {
-    "name": "kennel-1",
+  "dog box": {
+    "name": "dog box",
     "filename": "data/avatars/png/kennel-1.png"
   },
   "scratching": {
@@ -79,8 +79,8 @@
     "name": "syringe",
     "filename": "data/avatars/png/syringe.png"
   },
-  "bird-1": {
-    "name": "bird-1",
+  "yellow bird": {
+    "name": "yellow bird",
     "filename": "data/avatars/png/bird-1.png"
   },
   "cat": {
@@ -103,8 +103,8 @@
     "name": "test",
     "filename": "data/avatars/png/test.png"
   },
-  "bird-2": {
-    "name": "bird-2",
+  "birdcage": {
+    "name": "birdcage",
     "filename": "data/avatars/png/bird-2.png"
   },
   "collar": {
@@ -119,8 +119,8 @@
     "name": "lamp",
     "filename": "data/avatars/png/lamp.png"
   },
-  "shampoo-1": {
-    "name": "shampoo-1",
+  "bottle": {
+    "name": "bottle",
     "filename": "data/avatars/png/shampoo-1.png"
   },
   "thermometer": {
@@ -135,8 +135,8 @@
     "name": "comb",
     "filename": "data/avatars/png/comb.png"
   },
-  "fly-swatter": {
-    "name": "fly-swatter",
+  "swatter": {
+    "name": "swatter",
     "filename": "data/avatars/png/fly-swatter.png"
   },
   "leash": {
@@ -155,16 +155,16 @@
     "name": "birdhouse",
     "filename": "data/avatars/png/birdhouse.png"
   },
-  "dog-food": {
-    "name": "dog-food",
+  "dog food": {
+    "name": "dog food",
     "filename": "data/avatars/png/dog-food.png"
   },
   "food": {
     "name": "food",
     "filename": "data/avatars/png/food.png"
   },
-  "pet-bed": {
-    "name": "pet-bed",
+  "pet bed": {
+    "name": "pet bed",
     "filename": "data/avatars/png/pet-bed.png"
   },
   "snake": {
