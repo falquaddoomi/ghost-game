@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "client": "cd client && yarn start",
-    "server": "nodemon io_server.js --ignore client/",
+    "server": "nodemon server/src/io_server.js --exec babel-node --presets @babel/preset-env,@babel/preset-stage-0 --ignore client/",
     "dev": "concurrently --kill-others-on-fail \"yarn server\" \"yarn client\""
   },
   "dependencies": {
@@ -14,6 +14,11 @@
     "word-list-json": "^0.2.0"
   },
   "devDependencies": {
+    "@babel/cli": "^7.0.0-beta.42",
+    "@babel/core": "^7.0.0-beta.42",
+    "@babel/node": "^7.0.0-beta.42",
+    "@babel/preset-env": "^7.0.0-beta.42",
+    "@babel/preset-stage-0": "^7.0.0-beta.42",
     "concurrently": "^3.5.1"
   }
 }
