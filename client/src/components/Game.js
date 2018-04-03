@@ -1,15 +1,11 @@
 /* globals require */
 import React from 'react';
 import io from 'socket.io-client';
-import { TransitionGroup, CSSTransition } from "react-transition-group";
-import FlipMove from 'react-flip-move';
-
 import {PulseLoader} from "halogenium";
 import {withRouter} from "react-router-dom";
 
-import avatars from '../data/avatars.json';
-
-import shortid from 'short-id';
+import PlayerTray from "./parts/PlayerTray";
+import ChallengeDisplay from "./parts/ChallengeDisplay";
 
 // deal with connecting here
 const socket = io('http://localhost:5005');
@@ -71,32 +67,7 @@ class Game extends React.Component {
     };
 
     playersUpdated = (players) => {
-        this.setState((pstate) => {
-            // any players who have different scores need to show an animated change
-            const newDeltas = Object.entries(pstate.players)
-                .filter(([k,v]) => players[k])
-                .map(([k,v]) => ({
-                    id: v.id,
-                    deltaID: shortid.generate(),
-                    delta: players[k].score - v.score,
-                    deathtime: Date.now() + 1000
-                }))
-                .filter(x => x.delta !== 0);
-
-            return {
-                players,
-                deltas: pstate.deltas.concat(newDeltas)
-            };
-        }, () => {
-            console.log(`score deltas: ${JSON.stringify(this.state.deltas)}`);
-
-            // eventually clean up any dead deltas
-            setTimeout(() => {
-                this.setState((pstate) => ({
-                    deltas: pstate.deltas.filter(x => x.deathtime > Date.now())
-                }));
-            }, 1100);
-        });
+        this.setState({ players });
     };
 
     wordUpdated = (currentWord) => {
@@ -108,9 +79,11 @@ class Game extends React.Component {
     };
 
     challengeInProgress = (accuser, accused) => {
-        console.log(`${accuser} is challening ${accused} over ${this.state.current.map(({letter}) => letter).join("")}`)
+        console.log(`${accuser} is challenging ${accused} over ${this.state.current.map(({letter}) => letter).join("")}`);
         this.setState({
-            challengeInProgress: true
+            challengeInProgress: true,
+            challengerID: accuser,
+            accusedID: accused
         });
     };
 
@@ -118,7 +91,10 @@ class Game extends React.Component {
         console.log("resolved! violation?: ", violated);
 
         this.setState({
-            challengeInProgress: false
+            challengeInProgress: false,
+            challengerID: accuser,
+            accusedID: accused,
+            violated: violated
         });
     };
 
@@ -144,8 +120,6 @@ class Game extends React.Component {
     };
 
     requestChange = () => {
-        // FIXME: check if we're connected; use local state if we're not
-
         const {left, right} = this.state;
 
         // reject if they didn't type anything
@@ -162,7 +136,6 @@ class Game extends React.Component {
     };
 
     requestChallenge = () => {
-        // TODO: send challenge request to server
         socket.emit('challengeRequested');
     };
 
@@ -183,7 +156,6 @@ class Game extends React.Component {
     };
 
     resetGame = () => {
-        // FIXME: check if we're connected; use local state if we're not
         socket.emit('requestReset');
     };
 
@@ -212,101 +184,67 @@ class Game extends React.Component {
                 : (this.isMyTurn() ? <i>enter a letter to begin</i> : <i>waiting for other players...</i>)
         );
 
-        // me
-        const avatarEntry = this.props.avatar ? avatars[this.props.avatar.name] : null;
-        const avatarImage = avatarEntry
-            ? <img width={30} height={30} src={require(`../${avatarEntry.filename}`)} alt={avatarEntry.name} />
-            : null;
-
         return (
             <div className="Screen">
                 <div className="CenterModal">
-                    {/*
-                    <div style={{flex: '0.2 0 auto', justifyContent: 'flex-start'}}>
-                        <div style={{display: 'flex', alignItems: 'center', padding: '5px', background: '#eee', width: '100%'}}>
-                            {this.props.name} {avatarImage}
-                            <a href="/profile">change name/avatar</a>
-                        </div>
-                    </div>
-                    */}
-
                     <div className="Controls" style={{flex: '0.8 0'}}>
                         <div className="DictIndicator">
-                        { myTurnBlurb }
+                            {myTurnBlurb}
                         </div>
 
                         <div className={`WordHolder CurrentSegment ${inDict ? 'error' : ''}`}>
                             {
                                 !inDict && current.length > 0 && right === '' &&
-                                <input type="text" name="left_insert" disabled={!this.isMyTurn()} onChange={this.edited} onKeyPress={this.checkEnter} value={left} className="NewLetter WordStyler" maxLength={1} />
+                                <input type="text" name="left_insert" disabled={!this.isMyTurn()} onChange={this.edited}
+                                    onKeyPress={this.checkEnter} value={left} className="NewLetter WordStyler"
+                                    maxLength={1}/>
                             }
 
-                            { current.map(({ key, letter }) => <span key={key} className="WordStyler CommittedLetter">{letter}</span>) }
+                            {current.map(({key, letter}) => <span key={key}
+                                className="WordStyler CommittedLetter">{letter}</span>)}
 
                             {
                                 !inDict && left === '' &&
-                                <input type="text" ref={(me) => { this.leftbox = me; }} autoFocus={true} disabled={!this.isMyTurn()} name="right_insert" onChange={this.edited} onKeyPress={this.checkEnter} value={right} className="NewLetter WordStyler" maxLength={1}/>
+                                <input type="text" ref={(me) => {
+                                    this.leftbox = me;
+                                }} autoFocus={true} disabled={!this.isMyTurn()} name="right_insert"
+                                    onChange={this.edited} onKeyPress={this.checkEnter} value={right}
+                                    className="NewLetter WordStyler" maxLength={1}/>
                             }
                         </div>
 
                         <div className="ButtonTray">
-                        { !inDict
-                            ? <button className={`Button Commit ${left || right ? 'ready' : ''}`} onClick={this.requestChange}>commit</button>
-                            : <button className={`Button ${ this.isMyTurn() && "Reset" }`} onClick={this.resetGame}>reset</button>
-                        }
+                            {!inDict
+                                ? <button className={`Button Commit ${left || right ? 'ready' : ''}`}
+                                    onClick={this.requestChange}>commit</button>
+                                : <button className={`Button ${ this.isMyTurn() && "Reset" }`}
+                                    onClick={this.resetGame}>reset</button>
+                            }
 
-                        { !inDict &&
-                            <button className={`Button ${ this.isChallengeAllowed() && "Challenge" }`} onClick={this.requestChallenge}>
-                            { !this.state.challengeInProgress ? "challenge" : <PulseLoader color="white" size="4px" margin="4px" /> }
+                            {!inDict &&
+                            <button className={`Button ${ this.isChallengeAllowed() && "Challenge" }`}
+                                onClick={this.requestChallenge}>
+                                {!this.state.challengeInProgress ? "challenge" :
+                                    <PulseLoader color="white" size="4px" margin="4px"/>}
                             </button>
-                        }
+                            }
                         </div>
                     </div>
 
-                    <FlipMove className="PlayerTray" duration={400} easing="ease-in-out">
-                    {
-                        this.state.players.map((player) => {
-                            const isPlayersTurn = player.id === this.state.currentPlayerID;
+                    <ChallengeDisplay
+                        challengeInProgress={this.state.challengeInProgress}
+                        players={this.state.players}
+                        challengerID={this.state.challengerID}
+                        accusedID={this.state.accusedID}
+                        violated={this.state.violated}
+                    />
 
-                            const avatarEntry = player.avatar ? avatars[player.avatar] : null;
-                            const avatarImage = avatarEntry
-                                ? <img width={30} height={30} src={require(`../${avatarEntry.filename}`)} alt={player.avatar} />
-                                : null;
-
-                            return (
-                                <div key={player.id}
-                                    className={`PlayerTile ${isPlayersTurn ? 'current' : ''} ${ player.id === this.state.myID ? 'you' : ''}`}>
-
-                                    <div className="PlayerPortrait">
-                                    { avatarImage }
-                                    </div>
-
-                                    <div className="PlayerID">{player.name}</div>
-                                    <div className="PlayerScore">{
-                                        player.score > 0 ? "ghost".slice(0, player.score) : '-'
-                                    }</div>
-
-                                    <div className="arrow-down"/>
-
-                                    <div className="deltas">
-                                    {
-                                        // render per-player animated deltas
-                                        this.state.deltas
-                                            .filter(x => x.id === player.id)
-                                            .map((x) =>
-                                                <div className={`score-delta ${x.delta > 0 ? 'score-up' : 'score-down'}`}>
-                                                {x.delta > 0 ? '💥' : ''}
-                                                </div>
-                                            )
-                                    }
-                                    </div>
-                                </div>
-                            );
-                        })
-                    }
-                    </FlipMove>
-
-                    {/*<button id="HardReset" className="Button" onClick={this.resetGame}>h a r d r e s e t</button>*/}
+                    <PlayerTray
+                        players={this.state.players}
+                        currentPlayerID={this.state.currentPlayerID}
+                        myID={this.state.myID}
+                        deltas={this.state.deltas}
+                    />
                 </div>
             </div>
         );
